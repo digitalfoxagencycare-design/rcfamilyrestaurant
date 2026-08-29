@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu as MenuIcon, X, Phone } from "lucide-react";
+import { Menu as MenuIcon, X, Phone, ShieldCheck } from "lucide-react";
 import restaurant from "../data/restaurant";
 
 const links = [
@@ -10,7 +10,7 @@ const links = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ onOpenAdmin }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,12 +20,19 @@ export default function Navbar() {
           {restaurant.name}
         </a>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
+        <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">
           {links.map((l) => (
             <a key={l.href} href={l.href} className="hover:text-secondary transition-colors">
               {l.label}
             </a>
           ))}
+          <button
+            onClick={onOpenAdmin}
+            className="flex items-center gap-1.5 text-xs bg-slate-800/80 hover:bg-slate-700 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-full font-bold transition shadow-sm"
+            title="Open Admin Dashboard"
+          >
+            <ShieldCheck size={14} /> Admin Portal
+          </button>
         </nav>
 
         <a
@@ -47,6 +54,15 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          <button
+            onClick={() => {
+              setOpen(false);
+              onOpenAdmin && onOpenAdmin();
+            }}
+            className="flex items-center justify-center gap-2 bg-slate-800 text-amber-400 border border-amber-500/30 px-4 py-2 rounded-full font-bold text-xs"
+          >
+            <ShieldCheck size={16} /> Admin Portal
+          </button>
           <a
             href={`tel:${restaurant.phones[0]}`}
             className="flex items-center justify-center gap-2 bg-primary px-4 py-2 rounded-full font-bold"

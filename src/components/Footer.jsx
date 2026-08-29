@@ -1,7 +1,7 @@
-import { Phone, MapPin } from "lucide-react";
+import { Phone, MapPin, ShieldCheck } from "lucide-react";
 import restaurant from "../data/restaurant";
 
-export default function Footer() {
+export default function Footer({ onOpenAdmin }) {
   return (
     <footer id="contact" className="bg-ink text-white/80 py-10 px-4">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -12,7 +12,13 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <button
+            onClick={onOpenAdmin}
+            className="flex items-center gap-1.5 text-xs text-amber-400/90 hover:text-amber-300 font-semibold border border-amber-500/30 px-3.5 py-1.5 rounded-full hover:bg-white/5 transition"
+          >
+            <ShieldCheck size={14} /> Manager Login
+          </button>
           {restaurant.phones.map((p) => (
             <a
               key={p}
