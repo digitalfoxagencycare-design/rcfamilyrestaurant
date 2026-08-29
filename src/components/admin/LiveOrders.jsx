@@ -12,6 +12,7 @@ import {
   Filter,
   Check,
 } from "lucide-react";
+import { printThermalReceipt58mm, printThermalKOT58mm } from "../../lib/thermalPrinter";
 
 export default function LiveOrders({ orders, onUpdateStatus }) {
   const [filterStatus, setFilterStatus] = useState("All");
@@ -42,7 +43,7 @@ export default function LiveOrders({ orders, onUpdateStatus }) {
         <div className="flex items-center gap-2">
           <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            Live Kitchen Sync
+            Nova SaaS Live Sync
           </span>
         </div>
       </div>
@@ -143,57 +144,65 @@ export default function LiveOrders({ orders, onUpdateStatus }) {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 gap-2">
-              <span className="text-[11px] text-slate-400 font-medium truncate">
-                {ord.paymentStatus}
-              </span>
-
-              <div className="flex items-center gap-1.5">
-                {ord.status === "Pending" && (
+            {/* Action Buttons with 58mm Thermal Print */}
+            <div className="flex flex-col gap-2 pt-3 border-t border-slate-800/80">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => onUpdateStatus(ord.id, "Preparing")}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition"
+                    onClick={() => printThermalReceipt58mm(ord)}
+                    className="p-1.5 bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 rounded-lg text-xs font-bold transition"
+                    title="Print 58mm Bill Receipt"
                   >
-                    Send to Kitchen
+                    <Printer size={13} />
                   </button>
-                )}
-
-                {ord.status === "Preparing" && (
                   <button
-                    onClick={() => onUpdateStatus(ord.id, "Ready")}
-                    className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition"
+                    onClick={() => printThermalKOT58mm(ord)}
+                    className="p-1.5 bg-slate-900 hover:bg-slate-800 text-blue-400 border border-slate-700 rounded-lg text-xs font-bold transition"
+                    title="Print 58mm KOT Slip"
                   >
-                    Mark Ready
+                    KOT
                   </button>
-                )}
+                </div>
 
-                {ord.status === "Ready" && (
-                  <button
-                    onClick={() => onUpdateStatus(ord.id, "Completed")}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1"
-                  >
-                    <Check size={13} /> Complete
-                  </button>
-                )}
+                <div className="flex items-center gap-1.5">
+                  {ord.status === "Pending" && (
+                    <button
+                      onClick={() => onUpdateStatus(ord.id, "Preparing")}
+                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition"
+                    >
+                      Send to Kitchen
+                    </button>
+                  )}
 
-                {ord.status === "Completed" && (
-                  <span className="text-emerald-400 font-bold text-xs flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1 rounded-md">
-                    <CheckCircle2 size={13} /> Delivered
-                  </span>
-                )}
+                  {ord.status === "Preparing" && (
+                    <button
+                      onClick={() => onUpdateStatus(ord.id, "Ready")}
+                      className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition"
+                    >
+                      Mark Ready
+                    </button>
+                  )}
+
+                  {ord.status === "Ready" && (
+                    <button
+                      onClick={() => onUpdateStatus(ord.id, "Completed")}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1"
+                    >
+                      <Check size={13} /> Complete
+                    </button>
+                  )}
+
+                  {ord.status === "Completed" && (
+                    <span className="text-emerald-400 font-bold text-xs flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1 rounded-md">
+                      <CheckCircle2 size={13} /> Delivered
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {filteredOrders.length === 0 && (
-        <div className="text-center py-16 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
-          <ShoppingBag size={36} className="mx-auto text-slate-600 mb-2" />
-          <p className="text-slate-400 text-sm font-semibold">No orders in this queue.</p>
-        </div>
-      )}
     </div>
   );
 }

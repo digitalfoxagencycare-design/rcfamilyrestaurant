@@ -1,110 +1,61 @@
 import { useState, useEffect } from "react";
-import { Globe, SlidersHorizontal } from "lucide-react";
+import { Globe, SlidersHorizontal, Sparkles } from "lucide-react";
 import Storefront from "./components/Storefront";
 import AdminDashboard from "./components/admin/AdminDashboard";
-import initialMenu from "./data/menu";
-import initialRestaurant from "./data/restaurant";
+import {
+  getSavedMenu,
+  saveMenu,
+  getSavedOrders,
+  saveOrders,
+  getSavedBookings,
+  saveBookings,
+  getSavedSettings,
+  saveSettings,
+} from "./lib/storage";
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => {
     return window.location.hash === "#admin" ? "admin" : "website";
   });
 
-  // Central State for Menu, Cart, Orders, Bookings, Restaurant Info
-  const [menu, setMenu] = useState(initialMenu);
+  // Persistent State across page reloads (via localStorage & Cloud Engine)
+  const [menu, setMenuState] = useState(() => getSavedMenu());
   const [cart, setCart] = useState([]);
-  const [restaurantInfo, setRestaurantInfo] = useState({
-    ...initialRestaurant,
-    isOpen: true,
-    announcement: "Fresh Lambasinghi Country Specials & Dum Biryanis Hot All Day! Free Delivery on orders above ₹499.",
-    taxRate: 5,
-    deliveryFee: 40,
-    freeDeliveryAbove: 499,
-  });
+  const [orders, setOrdersState] = useState(() => getSavedOrders());
+  const [bookings, setBookingsState] = useState(() => getSavedBookings());
+  const [restaurantInfo, setRestaurantInfoState] = useState(() => getSavedSettings());
 
-  // Mock live orders
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD-1048",
-      customer: "Suresh Kumar (Tourist)",
-      phone: "+91 94401 23456",
-      type: "Dine-In (Table 4)",
-      time: "10 mins ago",
-      items: [
-        { id: "nb-1", name: "France Biryani (Prawns Special)", qty: 2, price: 350 },
-        { id: "st-1", name: "Chicken 65", qty: 1, price: 280 },
-      ],
-      total: 1029,
-      status: "Preparing",
-      paymentStatus: "Paid (UPI)",
-    },
-    {
-      id: "ORD-1047",
-      customer: "Ananya Sharma (Araku Group)",
-      phone: "+91 98850 11223",
-      type: "Takeaway / Parcel",
-      time: "25 mins ago",
-      items: [
-        { id: "vb-2", name: "Mushroom Biryani", qty: 2, price: 200 },
-        { id: "vd-2", name: "Paneer 65", qty: 1, price: 250 },
-      ],
-      total: 682,
-      status: "Ready",
-      paymentStatus: "Paid (Cash)",
-    },
-    {
-      id: "ORD-1046",
-      customer: "Kiran Varma",
-      phone: "+91 90001 88776",
-      type: "Dine-In (Table 2)",
-      time: "45 mins ago",
-      items: [
-        { id: "nb-2", name: "Mutton Biryani", qty: 1, price: 350 },
-        { id: "st-5", name: "Garlic Chicken", qty: 1, price: 250 },
-      ],
-      total: 630,
-      status: "Completed",
-      paymentStatus: "Paid (Card)",
-    },
-  ]);
+  // Wrappers to update state & persist immediately
+  const setMenu = (newMenu) => {
+    setMenuState(newMenu);
+    saveMenu(newMenu);
+  };
 
-  // Mock Bookings
-  const [bookings, setBookings] = useState([
-    {
-      id: "BK-301",
-      name: "Dr. Vikram Reddy",
-      phone: "+91 98490 55443",
-      guests: 6,
-      date: "Today, 8:30 PM",
-      type: "Family Dinner",
-      status: "Confirmed",
-    },
-    {
-      id: "BK-302",
-      name: "Pooja Hegde (Araku Group)",
-      phone: "+91 97000 12349",
-      guests: 12,
-      date: "Tomorrow, 1:00 PM",
-      type: "Tour Group Lunch",
-      status: "Pending",
-    },
-    {
-      id: "BK-303",
-      name: "Chandra Sekhar",
-      phone: "+91 99887 66554",
-      guests: 4,
-      date: "Tomorrow, 8:00 PM",
-      type: "Dine-In Table",
-      status: "Confirmed",
-    },
-  ]);
+  const setOrders = (newOrders) => {
+    setOrdersState(newOrders);
+    saveOrders(newOrders);
+  };
 
-  // Listen to hash changes in URL
+  const setBookings = (newBookings) => {
+    setBookingsState(newBookings);
+    saveBookings(newBookings);
+  };
+
+  const setRestaurantInfo = (newInfo) => {
+    setRestaurantInfoState(newInfo);
+    saveSettings(newInfo);
+  };
+
+  // Listen to hash changes in URL (e.g. localhost:5180/#admin)
   useEffect(() => {
     const handleHashChange = () => {
       if (window.location.hash === "#admin") {
         setCurrentView("admin");
-      } else if (window.location.hash === "#website" || window.location.hash === "#home" || window.location.hash === "") {
+      } else if (
+        window.location.hash === "#website" ||
+        window.location.hash === "#home" ||
+        window.location.hash === ""
+      ) {
         setCurrentView("website");
       }
     };
@@ -144,26 +95,25 @@ export default function App() {
   };
 
   const handlePlaceOrder = (newOrder) => {
-    setOrders((prev) => [newOrder, ...prev]);
+    const updated = [newOrder, ...orders];
+    setOrders(updated);
     setCart([]);
   };
 
   const handleUpdateOrderStatus = (orderId, newStatus) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-    );
+    const updated = orders.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o));
+    setOrders(updated);
   };
 
   const handleUpdateBooking = (bookingId, newStatus) => {
-    setBookings((prev) =>
-      prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
-    );
+    const updated = bookings.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b));
+    setBookings(updated);
   };
 
   return (
     <div className="min-h-screen relative font-body text-ink">
-      {/* Floating Preview Switcher Toolbar for Localhost testing */}
-      <div className="fixed bottom-5 left-5 z-50 bg-slate-950/90 text-white backdrop-blur border border-slate-700/80 rounded-full shadow-2xl p-1.5 flex items-center gap-1">
+      {/* Floating Preview Switcher Toolbar with Nova SaaS branding */}
+      <div className="fixed bottom-5 left-5 z-50 bg-slate-950/95 text-white backdrop-blur border border-slate-700/80 rounded-full shadow-2xl p-1.5 flex items-center gap-1.5">
         <button
           onClick={switchToWebsite}
           className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full transition ${
@@ -182,8 +132,11 @@ export default function App() {
               : "text-slate-300 hover:text-white"
           }`}
         >
-          <SlidersHorizontal size={14} /> Admin Dashboard
+          <SlidersHorizontal size={14} /> Nova POS & Admin
         </button>
+        <span className="hidden sm:inline-block border-l border-slate-700 pl-2 pr-1 text-[10px] text-amber-400 font-bold">
+          Nova SaaS OS
+        </span>
       </div>
 
       {currentView === "admin" ? (

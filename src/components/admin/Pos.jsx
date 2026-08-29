@@ -15,7 +15,9 @@ import {
   User,
   Phone,
   RotateCcw,
+  Sparkles,
 } from "lucide-react";
+import { printThermalReceipt58mm, printThermalKOT58mm } from "../../lib/thermalPrinter";
 
 export default function Pos({ menu, onPlaceOrder, activeOrders }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -78,7 +80,7 @@ export default function Pos({ menu, onPlaceOrder, activeOrders }) {
   const gstAmount = Math.round((subtotal - discountAmount) * 0.05);
   const grandTotal = Math.max(0, subtotal - discountAmount + gstAmount);
 
-  const handleSettleOrder = (status = "Preparing") => {
+  const handleSettleOrder = (status = "Preparing", autoPrint = true) => {
     if (posCart.length === 0) {
       alert("Please add items to create a bill.");
       return;
@@ -102,6 +104,16 @@ export default function Pos({ menu, onPlaceOrder, activeOrders }) {
 
     onPlaceOrder && onPlaceOrder(newOrder);
     setSettledSuccess(newOrder);
+
+    // Trigger 58mm Thermal Print
+    if (autoPrint) {
+      if (status === "Preparing") {
+        printThermalKOT58mm(newOrder);
+      } else {
+        printThermalReceipt58mm(newOrder);
+      }
+    }
+
     setPosCart([]);
     setCustomerName("");
     setCustomerPhone("");
@@ -218,8 +230,13 @@ export default function Pos({ menu, onPlaceOrder, activeOrders }) {
         <div>
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
             <div>
-              <h3 className="font-display font-bold text-sm text-white">Current Order Bill</h3>
-              <p className="text-xs text-amber-400 font-semibold">
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-display font-bold text-sm text-white">Current Order Bill</h3>
+                <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.2 rounded font-bold">
+                  58mm Thermal
+                </span>
+              </div>
+              <p className="text-xs text-amber-400 font-semibold mt-0.5">
                 {orderType === "dine-in" ? selectedTable : orderType.toUpperCase()}
               </p>
             </div>
@@ -343,18 +360,23 @@ export default function Pos({ menu, onPlaceOrder, activeOrders }) {
 
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => handleSettleOrder("Preparing")}
+              onClick={() => handleSettleOrder("Preparing", true)}
               className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1 shadow-md"
             >
-              <Printer size={14} /> Send KOT
+              <Printer size={14} /> 58mm KOT
             </button>
             <button
-              onClick={() => handleSettleOrder("Completed")}
+              onClick={() => handleSettleOrder("Completed", true)}
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1 shadow-md"
             >
-              <CheckCircle2 size={14} /> Paid & Bill
+              <CheckCircle2 size={14} /> Paid & 58mm Bill
             </button>
           </div>
+
+          {/* Nova SaaS Agency Footer */}
+          <p className="text-[10px] text-center text-slate-500 font-medium pt-1">
+            Powered by <span className="text-amber-400 font-bold">Nova SaaS POS Engine</span>
+          </p>
         </div>
       </div>
 
@@ -370,11 +392,27 @@ export default function Pos({ menu, onPlaceOrder, activeOrders }) {
             <p className="text-xs text-slate-300 mt-2">
               Total Amount of <span className="font-bold text-emerald-400">₹{settledSuccess.total}</span> received via {settledSuccess.paymentStatus}.
             </p>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => printThermalReceipt58mm(settledSuccess)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1"
+              >
+                <Printer size={13} /> Print 58mm Bill
+              </button>
+              <button
+                onClick={() => printThermalKOT58mm(settledSuccess)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-blue-400 border border-blue-500/30 font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1"
+              >
+                <Printer size={13} /> Print KOT
+              </button>
+            </div>
+
             <button
               onClick={() => setSettledSuccess(null)}
-              className="mt-5 w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs py-2.5 rounded-xl transition"
+              className="mt-3 w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs py-2.5 rounded-xl transition"
             >
-              Close & Next Order
+              Next Order
             </button>
           </div>
         </div>

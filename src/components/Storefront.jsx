@@ -484,6 +484,17 @@ export default function Storefront({
             </div>
           </div>
         </div>
+
+        {/* Powered by Nova SaaS Footer Branding */}
+        <div className="max-w-6xl mx-auto mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+          <p>© {new Date().getFullYear()} {restaurant.name}. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <span>Powered by</span>
+            <span className="bg-slate-900 border border-amber-500/30 text-amber-400 px-2.5 py-0.5 rounded-full font-bold text-[11px] shadow-sm">
+              Nova SaaS Restaurant Tech
+            </span>
+          </div>
+        </div>
       </section>
 
       {/* Slide-Out Cart Drawer */}

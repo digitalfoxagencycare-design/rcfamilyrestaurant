@@ -7,7 +7,9 @@ import {
   Flame,
   Utensils,
   Check,
+  Printer,
 } from "lucide-react";
+import { printThermalKOT58mm } from "../../lib/thermalPrinter";
 
 export default function Kitchen({ orders, onUpdateStatus }) {
   const [checkedItems, setCheckedItems] = useState({});
@@ -30,9 +32,14 @@ export default function Kitchen({ orders, onUpdateStatus }) {
             <ChefHat size={26} />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold font-display text-white">
-              Kitchen Display System (KDS)
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-white">
+                Kitchen Display System (KDS)
+              </h2>
+              <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">
+                Nova SaaS Kitchen Engine
+              </span>
+            </div>
             <p className="text-slate-400 text-xs sm:text-sm">
               Live chef tickets for Biryani Counter, Fryer Station & Tiffin prep.
             </p>
@@ -64,7 +71,16 @@ export default function Kitchen({ orders, onUpdateStatus }) {
               {/* Ticket Top */}
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                 <div>
-                  <span className="font-mono text-base font-black text-amber-400">{ord.id}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-base font-black text-amber-400">{ord.id}</span>
+                    <button
+                      onClick={() => printThermalKOT58mm(ord)}
+                      className="p-1 bg-slate-900 hover:bg-slate-800 text-blue-400 border border-slate-700 rounded text-xs transition"
+                      title="Print 58mm KOT"
+                    >
+                      <Printer size={12} />
+                    </button>
+                  </div>
                   <p className="text-xs text-white font-bold mt-0.5">{ord.type}</p>
                 </div>
 
