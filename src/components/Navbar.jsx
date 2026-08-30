@@ -16,8 +16,18 @@ export default function Navbar({ onOpenAdmin }) {
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-ink/95 backdrop-blur text-white shadow-md">
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
-        <a href="#home" className="font-display font-extrabold text-lg sm:text-xl tracking-wide text-secondary">
-          {restaurant.name}
+        <a href="#home" className="flex items-center gap-3 group">
+          <img
+            src="/branding/rc_logo.jpg"
+            alt="RC Family Restaurant Logo"
+            className="w-11 h-11 rounded-full object-cover border-2 border-amber-400/80 shadow-md shadow-amber-500/20 group-hover:scale-105 transition"
+          />
+          <div>
+            <span className="font-display font-extrabold text-base sm:text-lg tracking-wide text-white group-hover:text-amber-400 transition block leading-tight">
+              {restaurant.name}
+            </span>
+            <span className="text-[10px] text-amber-400 font-semibold block">Lambasinghi Hill Station</span>
+          </div>
         </a>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-semibold">

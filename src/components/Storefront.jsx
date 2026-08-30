@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ShoppingBag,
   Plus,
@@ -14,6 +14,7 @@ import {
   Star,
   CheckCircle2,
   ChevronRight,
+  ChevronLeft,
   ShieldCheck,
   Utensils,
   Share2,
@@ -23,6 +24,37 @@ import {
 } from "lucide-react";
 import restaurant from "../data/restaurant";
 
+const HERO_SLIDES = [
+  {
+    id: 1,
+    image: "/hero_slides/slide1_bamboo_chicken.jpg",
+    badge: "🔥 Lambasinghi Special",
+    heading: "Firewood Roasted Bamboo Chicken & Tribal Cuisine",
+    subheading: "Authentic country chicken slow-roasted in fresh hill bamboo stalks over firewood embers amidst misty pine hills.",
+  },
+  {
+    id: 2,
+    image: "/hero_slides/slide2_dum_biryani.jpg",
+    badge: "👑 Royal Dum Handi",
+    heading: "Authentic Flavourful Biryanis & Hot Andhra Delicacies",
+    subheading: "From royal France Prawns Biryani to Mutton Dum Handi — prepared fresh daily for tourists and food connoisseurs.",
+  },
+  {
+    id: 3,
+    image: "/hero_slides/slide3_starters_patio.jpg",
+    badge: "🌿 Mountain Mist Dining",
+    heading: "Sizzling Andhra Starters on Fresh Banana Leaf",
+    subheading: "Crispy Chicken 65, Chicken Lollipops, and Chilli Paneer served hot in our scenic garden gazebo dining area.",
+  },
+  {
+    id: 4,
+    image: "/hero_slides/slide4_morning_tiffins.jpg",
+    badge: "☕ Araku Sunrise Breakfast",
+    heading: "Steaming Ghee Dosa & Fresh Filter Coffee",
+    subheading: "Start your Lambasinghi morning with crispy Ghee Karam Dosa, soft Idlis, hot Sambar Vadas and fresh filter coffee.",
+  },
+];
+
 export default function Storefront({
   menu,
   cart,
@@ -31,6 +63,7 @@ export default function Storefront({
   onOpenAdmin,
   onPlaceOrder,
 }) {
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [dietFilter, setDietFilter] = useState("all"); // 'all', 'veg', 'nonveg', 'bestseller'
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +73,17 @@ export default function Storefront({
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(null);
+
+  // Auto-advance hero slides every 5.5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -109,19 +153,23 @@ export default function Storefront({
       </div>
 
       {/* Main Navbar */}
-      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800/80 px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800/80 px-4 sm:px-6 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-amber-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-primary/30">
-            RC
-          </div>
-          <div>
-            <a href="#home" className="font-display font-extrabold text-lg sm:text-xl text-white tracking-wide flex items-center gap-1.5">
-              {restaurant.name}
-            </a>
-            <p className="text-xs text-amber-400 font-medium flex items-center gap-1">
-              <MapPin size={12} /> Lambasinghi, ASR District
-            </p>
-          </div>
+          <a href="#home" className="flex items-center gap-3 group">
+            <img
+              src="/branding/rc_logo.jpg"
+              alt="RC Family Restaurant"
+              className="w-12 h-12 rounded-full object-cover border-2 border-amber-400 shadow-md shadow-amber-500/25 group-hover:scale-105 transition"
+            />
+            <div>
+              <span className="font-display font-extrabold text-base sm:text-lg text-white tracking-wide group-hover:text-amber-400 transition block leading-tight">
+                {restaurant.name}
+              </span>
+              <p className="text-[11px] text-amber-400 font-medium flex items-center gap-1">
+                <MapPin size={11} /> Lambasinghi, ASR District
+              </p>
+            </div>
+          </a>
         </div>
 
         <div className="flex items-center gap-3">
@@ -155,27 +203,70 @@ export default function Storefront({
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-16 px-4 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-b border-slate-800">
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold px-3.5 py-1 rounded-full mb-4">
-            <Flame size={14} className="text-amber-400" /> #1 Family Restaurant & Andhra Cloud Kitchen in Lambasinghi
+      {/* 4K Hero Carousel Slider Section */}
+      <section className="relative overflow-hidden min-h-[540px] sm:min-h-[600px] flex items-center justify-center border-b border-slate-800">
+        {/* Background Image Slides with Ken-Burns Zoom Transition */}
+        {HERO_SLIDES.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentSlide ? "opacity-100 scale-100 z-0" : "opacity-0 scale-105 pointer-events-none -z-10"
+            }`}
+            style={{ transitionProperty: "opacity, transform" }}
+          >
+            <img
+              src={slide.image}
+              alt={slide.heading}
+              className="w-full h-full object-cover object-center filter brightness-[0.65] contrast-[1.08]"
+            />
           </div>
-          <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-tight max-w-4xl mx-auto">
-            Authentic Flavourful Biryanis & Hot Andhra Delicacies
+        ))}
+
+        {/* Dark Vignette & Gradient Overlays for High Contrast Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/40 z-10"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(2,6,23,0.8)_100%)] z-10"></div>
+
+        {/* Left / Right Carousel Controls */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-950/60 hover:bg-slate-900 border border-slate-700/80 text-white backdrop-blur-md flex items-center justify-center transition shadow-xl hover:scale-105 active:scale-95"
+          aria-label="Previous Slide"
+        >
+          <ChevronLeft size={22} />
+        </button>
+
+        <button
+          onClick={nextSlide}
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-950/60 hover:bg-slate-900 border border-slate-700/80 text-white backdrop-blur-md flex items-center justify-center transition shadow-xl hover:scale-105 active:scale-95"
+          aria-label="Next Slide"
+        >
+          <ChevronRight size={22} />
+        </button>
+
+        {/* Hero Content Overlay */}
+        <div className="max-w-5xl mx-auto text-center relative z-20 px-4 py-12 sm:py-16">
+          {/* Animated Badge */}
+          <div className="inline-flex items-center gap-2 bg-amber-500/20 backdrop-blur-md border border-amber-400/50 text-amber-300 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-4 shadow-lg shadow-amber-500/10 animate-fade-in">
+            <Flame size={15} className="text-amber-400" />
+            {HERO_SLIDES[currentSlide].badge}
+          </div>
+
+          <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-tight max-w-4xl mx-auto drop-shadow-2xl">
+            {HERO_SLIDES[currentSlide].heading}
           </h1>
-          <p className="text-slate-400 max-w-2xl mx-auto mt-4 text-sm sm:text-base leading-relaxed">
-            From steaming bamboo chicken to royal France Biryani, crispy starters and morning ghee tiffins — prepared hot & fresh for tourists & food lovers.
+
+          <p className="text-slate-200 max-w-2xl mx-auto mt-4 text-sm sm:text-base leading-relaxed drop-shadow-md font-medium">
+            {HERO_SLIDES[currentSlide].subheading}
           </p>
 
           {/* Order Type Toggle in Hero */}
-          <div className="mt-8 inline-flex p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl">
+          <div className="mt-8 inline-flex p-1.5 bg-slate-950/90 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl">
             <button
               onClick={() => setOrderType("dine-in")}
               className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
                 orderType === "dine-in"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-primary text-white shadow-md shadow-primary/30"
+                  : "text-slate-300 hover:text-white"
               }`}
             >
               🍽️ Dine-In (Table Order)
@@ -184,8 +275,8 @@ export default function Storefront({
               onClick={() => setOrderType("takeaway")}
               className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
                 orderType === "takeaway"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-primary text-white shadow-md shadow-primary/30"
+                  : "text-slate-300 hover:text-white"
               }`}
             >
               🛍️ Takeaway / Parcel
@@ -194,8 +285,8 @@ export default function Storefront({
               onClick={() => setOrderType("delivery")}
               className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
                 orderType === "delivery"
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-primary text-white shadow-md shadow-primary/30"
+                  : "text-slate-300 hover:text-white"
               }`}
             >
               🛵 Local Delivery
@@ -203,22 +294,46 @@ export default function Storefront({
           </div>
 
           {orderType === "dine-in" && (
-            <div className="mt-3 flex items-center justify-center gap-2 text-xs text-slate-400">
-              <span>Ordering at Table:</span>
+            <div className="mt-3 flex items-center justify-center gap-2 text-xs text-slate-300">
+              <span className="font-semibold">Ordering at Table:</span>
               <select
                 value={selectedTable}
                 onChange={(e) => setSelectedTable(e.target.value)}
-                className="bg-slate-900 border border-slate-700 text-amber-400 font-bold rounded-lg px-2.5 py-1 text-xs focus:outline-none"
+                className="bg-slate-900/90 border border-slate-700 text-amber-400 font-bold text-xs rounded-lg px-3 py-1 focus:outline-none"
               >
-                <option value="Table 1">Table 1 (Front Hall)</option>
-                <option value="Table 2">Table 2 (Front Hall)</option>
-                <option value="Table 3">Table 3 (Window View)</option>
-                <option value="Table 4">Table 4 (Family Corner)</option>
-                <option value="Table 5">Table 5 (Gazebo Garden)</option>
-                <option value="Table 6">Table 6 (AC Section)</option>
+                {[
+                  "Table 1 (Front Hall)",
+                  "Table 2 (Window View)",
+                  "Table 3 (Family Section)",
+                  "Table 4 (Garden Gazebo)",
+                  "Table 5 (Misty Veranda)",
+                  "Table 6 (Pine View Cabin)",
+                  "Gazebo 1 (VIP Open Air)",
+                  "Gazebo 2 (VIP Open Air)",
+                ].map((tbl) => (
+                  <option key={tbl} value={tbl}>
+                    {tbl}
+                  </option>
+                ))}
               </select>
             </div>
           )}
+
+          {/* Slider Dot Indicators */}
+          <div className="mt-8 flex items-center justify-center gap-2">
+            {HERO_SLIDES.map((slide, idx) => (
+              <button
+                key={slide.id}
+                onClick={() => setCurrentSlide(idx)}
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  idx === currentSlide
+                    ? "w-8 bg-amber-400 shadow-md shadow-amber-400/50"
+                    : "w-2.5 bg-slate-600/80 hover:bg-slate-400"
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 

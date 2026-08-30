@@ -69,9 +69,11 @@ export default function AdminDashboard({
       {/* Top Admin Header */}
       <header className="bg-slate-950/95 backdrop-blur border-b border-slate-800 sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary via-orange-600 to-amber-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-primary/20">
-            RC
-          </div>
+          <img
+            src="/branding/rc_logo.jpg"
+            alt="RC Logo"
+            className="w-11 h-11 rounded-full object-cover border-2 border-amber-400 shadow-md shadow-amber-500/20"
+          />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display font-black text-base sm:text-lg text-white leading-tight">
